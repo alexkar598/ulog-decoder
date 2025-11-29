@@ -101,7 +101,7 @@ fn print_backtrace(err: &impl ErrorCompat) {
 }
 
 #[derive(Parser, Debug)]
-#[command(about, long_about = None)]
+#[command(about, long_about = None, version, version, author)]
 struct CliArgs {
     /// Path to ELF file containing a uLog map
     #[arg(required = true)]
