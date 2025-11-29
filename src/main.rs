@@ -243,15 +243,22 @@ fn main_inner() -> Result<(), ULogDecoderError> {
             buf.clear();
 
             // All rzcobs frames are delimited with a null byte
-            {
+            loop {
                 let result = reader.read_until(0x00, &mut buf);
                 if result
                     .as_ref()
                     .is_err_and(|err| err.kind() == std::io::ErrorKind::TimedOut)
                 {
                     // We ignore timeout errors and silently try again
-                    return Ok(false);
+                    continue
                 }
+
+                // We have our data, stop reading
+                if result.is_ok() {
+                    break;
+                }
+
+                //A non timeout error happened, propagate it
                 result.context(EntryReadSnafu)?;
             }
 
