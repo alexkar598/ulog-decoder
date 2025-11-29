@@ -1,0 +1,27 @@
+[package]
+name = "ulog-decoder"
+version = "0.1.0"
+authors = ["alexkar598"]
+edition = "2024"
+publish = false
+description = "Utility to parse and decode uLog entries"
+
+[dependencies]
+byteorder = "1.5.0"
+elf = "0.8.0"
+itertools = "0.14.0"
+owo-colors = "4.2.3"
+rzcobs = "0.1.2"
+unescaper = "0.1.6"
+hxdmp = "0.2.1"
+snafu = { version = "0.8.9", features = ["backtraces-impl-backtrace-crate"] }
+color-backtrace = "0.7.2"
+dyf = "0.1.4"
+clap = { version = "4.5.53", features = ["derive", "unicode"] }
+serialport = "4.8.1"
+
+[dev-dependencies]
+assert_matches = "1.5.0"
+
+[profile.release]
+debug = true

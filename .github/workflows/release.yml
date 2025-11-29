@@ -1,0 +1,77 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - "*"
+    tags:
+      - "v*"
+  pull_request:
+    branches: [ "main" ]
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      attestations: write
+      actions: read
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        if: github.ref_type == 'tag'
+        with:
+          format: 'spdx-json'
+          output-file: 'sbom.spdx.json'
+          dependency-snapshot: true
+
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          push: false
+          context: .
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          outputs: type=local,dest=build
+
+      - name: Upload client exe artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ulog-decoder.exe
+          path: build/ulog-decoder.exe
+
+      - name: Upload client artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ulog-decoder
+          path: build/ulog-decoder
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
+        with:
+          files: build/*
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+          make_latest: true
+
+      - name: Attest SBOM
+        uses: actions/attest-sbom@v2
+        if: github.ref_type == 'tag'
+        with:
+          subject-path: 'build/*'
+          sbom-path: 'sbom.spdx.json'
+
+      - name: Attest
+        uses: actions/attest-build-provenance@v2
+        if: github.ref_type == 'tag'
+        with:
+          subject-path: 'build/*'
