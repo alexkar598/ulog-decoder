@@ -199,6 +199,7 @@ fn main_inner() -> Result<(), ULogDecoderError> {
             println!("Source: serial port {port} {}\n\n", args.baudrate);
             Box::new(BufReader::new(
                 serialport::new(&port, args.baudrate)
+                    .dtr_on_open(true)
                     // Timeout is important as by default we timeout immediately if reading when theres no data ready
                     .timeout(Duration::MAX)
                     .open()
@@ -250,7 +251,7 @@ fn main_inner() -> Result<(), ULogDecoderError> {
                     .is_err_and(|err| err.kind() == std::io::ErrorKind::TimedOut)
                 {
                     // We ignore timeout errors and silently try again
-                    continue
+                    continue;
                 }
 
                 // We have our data, stop reading
